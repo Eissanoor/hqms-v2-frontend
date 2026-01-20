@@ -77,12 +77,15 @@ const Login = () => {
             });
 
             // Handle successful login
-            if (response.data) {
-                // Store token and user data in localStorage
-                localStorage.setItem('accessToken', response.data.token || response.data.accessToken);
-                localStorage.setItem('userdata', JSON.stringify(response.data));
+            if (response.data && response.data.success) {
+                const { data } = response.data;
                 
-                toast.success('Login successful! Welcome back.', {
+                // Store tokens and user data in localStorage
+                localStorage.setItem('accessToken', data.user.accessToken);
+                localStorage.setItem('refreshToken', data.user.refreshToken);
+                localStorage.setItem('userdata', JSON.stringify(data));
+                
+                toast.success(`Welcome back, ${data.user.name}!`, {
                     duration: 3000,
                     position: 'top-center',
                     style: {
@@ -90,11 +93,13 @@ const Login = () => {
                         color: '#fff',
                         fontWeight: '500',
                     },
+                    icon: '👋',
                 });
 
                 // Navigate to home page
                 setTimeout(() => {
                     navigate('/Home');
+                    window.location.reload(); // Reload to fetch user roles
                 }, 1000);
             }
         } catch (error) {
@@ -111,6 +116,7 @@ const Login = () => {
                     color: '#fff',
                     fontWeight: '500',
                 },
+                icon: '❌',
             });
             
             console.error('Login error:', error);
