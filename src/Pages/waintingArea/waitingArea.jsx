@@ -431,14 +431,9 @@ const WaitingArea = () => {
               {/* /i want to their two button add his caption LAMA, DAMA/ */}
 
               <div className="flex space-x-4">
-                {/* Save button - enabled after department is assigned */}
+                {/* Save button - always enabled so vitals can be added before assignment */}
                 <button
-                  disabled={!patientData?.department}
-                  className={`px-6 py-2 rounded-lg font-semibold ${
-                    patientData?.department
-                      ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
-                  }`}
+                  className="px-6 py-2 rounded-lg font-semibold bg-green-500 text-white hover:bg-green-600"
                   onClick={handleSave}
                 >
                   {loading ? <Spinner /> : `${t("Save")}`}
@@ -455,9 +450,18 @@ const WaitingArea = () => {
                 >
                   {t("Print")}
                 </button>
-                {/* Assign button - always enabled (first step) */}
+                {/* Assign button - enabled only after vital signs are saved */}
                 <button
-                  className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 font-semibold"
+                  disabled={
+                    !patientData?.vitalSigns ||
+                    patientData?.vitalSigns?.length === 0
+                  }
+                  className={`px-6 py-2 rounded-lg font-semibold ${
+                    patientData?.vitalSigns &&
+                    patientData?.vitalSigns?.length > 0
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-gray-400 text-gray-600 cursor-not-allowed opacity-60"
+                  }`}
                   onClick={handleOpen}
                 >
                   {loading ? <Spinner /> : `${t("Assign")}`}
