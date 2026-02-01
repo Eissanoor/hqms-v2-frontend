@@ -24,8 +24,7 @@ const getCardClass = (registrationDate) => {
 
 const PatientMonitoring = () => {
   const [waitingPatients, setWaitingPatients] = useState([]);
-  const [nowServing, setNowServing] = useState([]);
-  const [nonDischargedPatients, setNonDischargedPatients] = useState([]);
+  const [assignedPatients, setAssignedPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
@@ -33,7 +32,7 @@ const PatientMonitoring = () => {
   const [calledPatients, setCalledPatients] = useState([]);
   const [searchBarcode, setSearchBarcode] = useState("");
 
-  // Fetch data from API
+  // Fetch data from API - split by department: null = waiting, has value = assigned (below section)
   useEffect(() => {
     const fetchPatients = async () => {
       try {
@@ -45,25 +44,14 @@ const PatientMonitoring = () => {
           }
         });
         if (response.data.success) {
-          setWaitingPatients(response.data.data.waiting || []);
-          setNowServing(response.data.data.inProgress || []);
+          const waiting = response.data.data.waiting || [];
+          const inProgress = response.data.data.inProgress || [];
+          const allPatients = [...waiting, ...inProgress];
+          // department null -> waiting area; department has value -> below section
+          setWaitingPatients(allPatients.filter((p) => !p.department));
+          setAssignedPatients(allPatients.filter((p) => p.department));
         } else {
           setError("Failed to fetch patient data.");
-        }
-
-        // Fetch non-discharged patients
-        const nonDischargedResponse = await axios.get(
-          `${baseUrl}/api/v1/patients/non-discharged`,
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          }
-        );
-        if (nonDischargedResponse.data.success) {
-          setNonDischargedPatients(nonDischargedResponse.data.data || []);
-        } else {
-          setError("Failed to fetch non-discharged patients.");
         }
       } catch (err) {
         setError("Error fetching data: " + err.message);
@@ -73,10 +61,10 @@ const PatientMonitoring = () => {
     };
 
     fetchPatients();
-    
+
     // Set up auto-refresh every 30 seconds
     const intervalId = setInterval(fetchPatients, 30000);
-    
+
     // Cleanup interval on component unmount
     return () => clearInterval(intervalId);
   }, []);
@@ -291,7 +279,7 @@ const PatientMonitoring = () => {
               )}
             </div>
 
-            {/* Assigned Patients Section */}
+            {/* Assigned Patients Section (department has value) */}
             <div className="bg-white rounded-lg shadow-md p-6">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-xl font-semibold text-blue-600 flex items-center">
@@ -303,16 +291,16 @@ const PatientMonitoring = () => {
                 <div className="flex items-center">
                   <span className="text-gray-600 mr-2">Total:</span>
                   <span className="bg-blue-100 text-blue-800 font-medium px-3 py-1 rounded-full">
-                    {nonDischargedPatients.length} patients
+                    {assignedPatients.length} patients
                   </span>
                 </div>
               </div>
               
-              {nonDischargedPatients.length === 0 ? (
+              {assignedPatients.length === 0 ? (
                 <div className="text-center text-gray-500 py-8">No assigned patients</div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                  {nonDischargedPatients.map((patient) => (
+                  {assignedPatients.map((patient) => (
                     <div
                       key={patient.id}
                       className={`${

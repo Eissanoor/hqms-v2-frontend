@@ -1,7 +1,7 @@
 
 
 let mainUrl = 'https://hqmsapi.gtrack.online';
-// let mainUrl = 'http://localhost:3000';  
+// let mainUrl = 'http://localhost:9030';  
 
 
 export const backendUrl = mainUrl;
