@@ -103,6 +103,7 @@ function PatientJourney() {
       { name: "Begin Time", uid: "beginTime", sortable: true },
       { name: "End Time", uid: "endTime", sortable: true },
       { name: "Total Hrs", uid: "totalHrs", sortable: true },
+      { name: "Remarks", uid: "remarks", sortable: true },
     ];
 
     const renderCell = (journey, columnKey) => {
@@ -145,6 +146,8 @@ function PatientJourney() {
                 ""}
               </span>
             );
+          case "remarks":
+            return <span>{journey?.patient?.remarks || "—"}</span>;
           default:
             return null;
         }
